@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract PizzaHut {
+    address public shopkeeper;
+    mapping(address => uint256) public num_pizza;
+
+    event OrderPlaced(address indexed customer, uint256 numPizzas);
+    event OrderCancelled(address indexed customer);
+
+    constructor() {
+        shopkeeper = msg.sender;
+    }
+
+    modifier Restaurent() {
+        require(msg.sender == shopkeeper, "Only restaurant can cancel the order once placed");
+        _;
+    }
+
+    function placeOrder(uint256 amount) external {
+        assert(amount > 2); // order must contain minimum two pizzas
+    
+        num_pizza[msg.sender] = amount;
+
+        emit OrderPlaced(msg.sender, amount);
+    }
+
+    function cancelOrder() external Restaurent {
+        uint256 amount = num_pizza[shopkeeper]; 
+        if (amount <= 50) {
+            revert("Order can be cancelled only if pizzas are more than 50"); // Revert without specifying an error message
+        }
+        num_pizza[shopkeeper] = 0;
+
+        emit OrderCancelled(shopkeeper);
+    }
+}
